@@ -40,15 +40,20 @@ class TodosScreen extends StatelessWidget {
   }
 
   Widget _todo(Todo todo, BuildContext context) {
-    return Dismissible(
-      key: Key("${todo.id}"),
-      child: _todoTile(todo, context),
-      confirmDismiss: (_) async {
-        BlocProvider.of<TodosCubit>(context).changeCompletion(todo);
-        return false;
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, Edit_Todo_Route, arguments: todo);
       },
-      background: Container(
-        color: Colors.indigo[50],
+      child: Dismissible(
+        key: Key("${todo.id}"),
+        child: _todoTile(todo, context),
+        confirmDismiss: (_) async {
+          BlocProvider.of<TodosCubit>(context).changeCompletion(todo);
+          return false;
+        },
+        background: Container(
+          color: Colors.indigo[50],
+        ),
       ),
     );
   }
