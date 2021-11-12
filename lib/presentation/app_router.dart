@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:todo_app/constants/strings.dart';
+import 'package:todo_app/cubit/add_todo_cubit.dart';
+import 'package:todo_app/cubit/edit_todo_cubit.dart';
 import 'package:todo_app/cubit/todos_cubit.dart';
+import 'package:todo_app/data/models/todo.dart';
 import 'package:todo_app/data/network_service.dart';
 import 'package:todo_app/data/repository.dart';
 import 'package:todo_app/presentation/screens/add_todo_screen.dart';
@@ -10,18 +13,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppRouter {
   Repository repository;
+  TodosCubit todosCubit;
 
   AppRouter() {
     repository = Repository(networkService: NetworkService());
+    todosCubit = TodosCubit(repository: repository);
   }
 
   Route onGenerateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
       case '/':
         return MaterialPageRoute(
-          builder: (_) => BlocProvider(
-            create: (BuildContext context) =>
-                TodosCubit(repository: repository),
+          builder: (_) => BlocProvider.value(
+            value: todosCubit,
             child: TodosScreen(),
           ),
         );
@@ -29,13 +33,24 @@ class AppRouter {
 
       case Add_Todo_Route:
         return MaterialPageRoute(
-          builder: (_) => AddTodo(),
+          builder: (_) => BlocProvider(
+            create: (BuildContext context) =>
+                AddTodoCubit(repository: repository, todosCubit: todosCubit),
+            child: AddTodoScreen(),
+          ),
         );
         break;
 
       case Edit_Todo_Route:
+        final todo = routeSettings.arguments as Todo;
         return MaterialPageRoute(
-          builder: (_) => EditTodo(),
+          builder: (_) => BlocProvider(
+            create: (BuildContext context) =>
+                EditTodoCubit(repository: repository, todosCubit: todosCubit),
+            child: EditTodoScreen(
+              todo: todo,
+            ),
+          ),
         );
         break;
 
